@@ -1,0 +1,32 @@
+{
+  "name": "@circlesland/auth-server",
+  "version": "0.2.0",
+  "description": "",
+  "keywords": [],
+  "author": "circles.land",
+  "license": "LGPL-3.0-or-later",
+  "scripts": {
+    "generate": "graphql-codegen --config codegen.yml",
+    "run": "node -r dotenv/config dist/main.js"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^1.21.3",
+    "@graphql-codegen/introspection": "^1.18.1",
+    "@graphql-codegen/typescript": "^1.21.1",
+    "@graphql-codegen/typescript-resolvers": "^1.19.0",
+    "@types/node": "^14.14.37",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.3"
+  },
+  "dependencies": {
+    "@circlesland/auth-data": "0.2.0",
+    "@circlesland/auth-mailer": "0.2.0",
+    "@circlesland/auth-util": "0.2.0",
+    "apollo-server": "^2.22.1",
+    "bcrypt": "^5.0.1",
+    "dotenv": "^8.2.0",
+    "graphql": "^15.5.0",
+    "graphql-import": "^1.0.2",
+    "jsonwebtoken": "^8.5.1"
+  }
+}

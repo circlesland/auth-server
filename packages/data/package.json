@@ -1,0 +1,21 @@
+{
+  "name": "@circlesland/auth-data",
+  "version": "0.2.0",
+  "description": "",
+  "keywords": [],
+  "author": "circles.land",
+  "license": "AGPL-3.0-or-later",
+  "scripts": {
+    "generate": "npx prisma generate --schema ./src/schema_template.prisma"
+  },
+  "devDependencies": {
+    "prisma": "^2.19.0",
+    "@types/node": "^14.14.37",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.3"
+  },
+  "dependencies": {
+    "@circlesland/auth-util": "0.2.0",
+    "@prisma/client": "^2.19.0"
+  }
+}

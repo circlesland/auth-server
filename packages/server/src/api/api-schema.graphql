@@ -1,0 +1,50 @@
+scalar Json
+
+type Mutation {
+    # Sends a one time code to the e-mail recipient.
+    loginWithEmail(appId:String! emailAddress:String!) : LoginResponse!
+
+    # Sends a one time that is encrypted with the supplied public key and awaits a decrypted response at the verify() method.
+    loginWithPublicKey(appId:String! publicKey:String!) : LoginResponse!
+
+    # Verifies the one time code and issues a JWT that proofs that the owner has access to the email address or the private key.
+    verify(oneTimeToken:String!) : VerifyResponse!
+}
+
+type Query {
+    keys(kid:String!) : PublicKey
+    version : Version
+}
+
+interface ActionResponse {
+    success: Boolean!
+    errorMessage: String
+}
+
+type PublicKey {
+    id: Int!
+    publicKey: String!
+    validTo: String!
+}
+
+type LoginResponse implements ActionResponse {
+    success: Boolean!
+    errorMessage: String
+    challenge: String # If 'loginWithPublicKey' then this field contains an encrypted one time token
+                      # that can be used passed to verify().
+}
+
+type VerifyResponse implements ActionResponse {
+    success: Boolean!
+    errorMessage: String
+    type: String
+    key: String
+    jwt:String!
+    exchangeTokenUrl: String! # The App's configured redirect url. This is the endpoint where the user can exchange the jwt for a session cookie.
+}
+
+type Version {
+    major: Int!
+    minor: Int!
+    revision: Int!
+}

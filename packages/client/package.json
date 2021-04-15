@@ -1,0 +1,41 @@
+{
+  "name": "@circlesland/auth-client",
+  "repository":"https://github.com/circlesland/circles-auth",
+  "version": "0.2.2",
+  "description": "",
+  "keywords": [],
+  "author": "circles.land",
+  "license": "LGPL-3.0-or-later",
+  "engines": {
+    "node": ">=15"
+  },
+  "main": "src/client.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "publishConfig": {
+    "registry":"https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "bundle": "npx --no-install webpack"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^8.5.1",
+    "@types/node": "^14.14.37",
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.0",
+    "process": "^0.11.10",
+    "stream-browserify": "^3.0.0",
+    "ts-loader": "^8.1.0",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.3",
+    "util": "^0.12.3",
+    "webpack": "^5.28.0",
+    "webpack-cli": "^4.6.0"
+  },
+  "dependencies": {
+    "cross-fetch": "^3.0.6",
+    "jsonwebtoken": "^8.5.1"
+  }
+}

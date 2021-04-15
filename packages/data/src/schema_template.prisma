@@ -1,0 +1,55 @@
+datasource db {
+    provider = "postgresql"
+    url = "REPLACE_ME_WITH_THE_CONNECTION_STRING"
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+model Apps {
+  id Int @default(autoincrement()) @id
+  appId String @unique              // The unique identifier of the app and the audience of the issued JWT.
+  appName String?                   // The human readable app name
+  appUrl String?                    // The human readable app name
+  appDescription String?            // A brief description of the app
+  appIcon String?                   // An e-mail address or a link to an imprint etc.
+  appContact String?                // An e-mail address or a link to an imprint etc.
+  corsOrigins String                // A semicolon separated string of cors domains from which the app operates.
+  exchangeCodeUrl String            // This page belongs to the auth-service. It allows the user to exchange the solved challenge agains a jwt.
+  exchangeTokenUrl String           // This is an application specific URL where the user can exchange the jwt against a session at the token's 'audience'.
+  challengeLifetime Int             // Specifies how long a challenge should be valid (in seconds).
+  tokenLifetime Int                 // Specifies how long tokens for this app should be valid (in seconds).
+  loginMailSubjectTemplate String?  // A mustache template for the login email subject line
+  loginMailHtmlTemplate String?     // A mustache template for the login email html content
+  loginMailTxtTemplate String?      // A mustache template for the login email plaintext content
+  loginWindowHtmlTemplate String?   // A mustache template for the login window
+}
+
+enum ChallengeState {
+    Unsolved
+    Solved
+}
+
+model Challenges {
+  timestamp DateTime // When the entry was created
+  type String // 'email' or 'publicKey'
+  key String // The email address in case of type=email, the public key in case of type='publicKey'
+  status ChallengeState // On every status change a new entry is created.
+  validUntil DateTime? // Until when the entry should be considered validś
+  challenge String // The generated challenge
+  @@unique([type, key, status, validUntil, challenge], name: "UX_Challenges_type_key_status_validUntil_challenge")
+  @@unique([challenge, status], name: "UX_Challenges_challenge_status")
+
+  appId String // The id of the 'App' to which the user wants to log-on.
+}
+
+model SigningKeyPairs {
+  id Int @default(autoincrement()) @id
+  validFrom DateTime
+  validTo DateTime
+  privateKeyPem String
+  publicKeyPem String
+  privateKeyJwk String
+  publicKeyJwk String
+}

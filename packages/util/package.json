@@ -1,0 +1,19 @@
+{
+  "name": "@circlesland/auth-util",
+  "version": "0.2.0",
+  "description": "",
+  "keywords": [],
+  "author": "circles.land",
+  "license": "LGPL-3.0-or-later",
+  "scripts": {},
+  "devDependencies": {
+    "@types/node": "^14.14.37",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.2.3"
+  },
+  "dependencies": {
+    "@types/pem-jwk": "^1.5.0",
+    "node-jose": "^2.0.0",
+    "pem-jwk": "^2.0.0"
+  }
+}

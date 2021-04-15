@@ -1,0 +1,19 @@
+{
+  "name": "@circlesland/auth-mailer",
+  "version": "0.2.0",
+  "description": "",
+  "keywords": [],
+  "author": "circles.land",
+  "license": "LGPL-3.0-or-later",
+  "devDependencies": {
+    "@types/mustache": "^4.0.1",
+    "@types/node": "^14.0.1",
+    "@types/nodemailer": "^6.4.0",
+    "ts-node": "^8.10.1",
+    "typescript": "^3.9.2"
+  },
+  "dependencies": {
+    "mustache": "^4.0.1",
+    "nodemailer": "^6.4.11"
+  }
+}
