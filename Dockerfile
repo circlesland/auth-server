@@ -6,7 +6,7 @@ WORKDIR /usr/o-platform/auth-server
 COPY packages/client /usr/o-platform/auth-server/packages/client
 COPY packages/data /usr/o-platform/auth-server/packages/data
 COPY packages/mailer /usr/o-platform/auth-server/packages/mailer
-COPY packages/server /usr/o-platform/auth-serverh/packages/server
+COPY packages/server /usr/o-platform/auth-server/packages/server
 COPY packages/util /usr/o-platform/auth-server/packages/util
 
 COPY build.sh /usr/o-platform/auth-server/build.sh
