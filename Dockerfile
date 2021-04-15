@@ -9,7 +9,7 @@ COPY packages/mailer /usr/o-platform/auth-server/packages/mailer
 COPY packages/server /usr/o-platform/auth-serverh/packages/server
 COPY packages/util /usr/o-platform/auth-server/packages/util
 
-COPY build-circles-auth-server.sh /usr/o-platform/auth-server/build-circles-auth-server.sh
+COPY build.sh /usr/o-platform/auth-server/build.sh
 COPY package.json /usr/o-platform/auth-server/package.json
 COPY package-lock.json /usr/o-platform/auth-server/package-lock.json
 COPY lerna.json /usr/o-platform/auth-server/lerna.json
