@@ -46,11 +46,8 @@ export class SigningKeyPair
         return validKeyPairs[0];
     }
 
-    public static async createKeyPair()
+    public static async createKeyPair(lifespanInMilliseconds:number)
     {
-        if (!process.env.KEY_ROTATION_INTERVAL)
-            throw new Error("process.env.KEY_ROTATION_INTERVAL is not set!");
-
         const newKeyPair = await KeyGenerator.generateRsaKeyPair();
         const now = new Date();
         const newKeyPairEntry = await prisma_rw.signingKeyPairs.create({
@@ -60,7 +57,7 @@ export class SigningKeyPair
                 privateKeyJwk: newKeyPair.privateKeyJwk,
                 publicKeyJwk: newKeyPair.publicKeyJwk,
                 validFrom: now,
-                validTo: new Date(now.getTime() + (parseInt(process.env.KEY_ROTATION_INTERVAL) * 1000))
+                validTo: new Date(now.getTime() + lifespanInMilliseconds)
             }
         });
 

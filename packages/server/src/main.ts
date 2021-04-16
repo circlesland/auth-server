@@ -13,12 +13,20 @@ export class Main
 {
     private readonly _resolvers: Resolvers;
     private readonly _keyRotator: KeyRotator;
+    private readonly _keyLifespan: number;
+    private readonly _instanceId: string;
+
     private _server: ApolloServer|null = null;
 
     constructor()
     {
+        if (!process.env.KEY_ROTATION_INTERVAL) {
+            throw new Error("The process.env.KEY_ROTATION_INTERVAL variable is not set.")
+        }
+        this._instanceId = ValueGenerator.generateRandomBase64String(8);
+        this._keyLifespan = parseInt(process.env.KEY_ROTATION_INTERVAL) * 1000;
         this._resolvers = new Resolvers();
-        this._keyRotator = new KeyRotator();
+        this._keyRotator = new KeyRotator(this._instanceId, this._keyLifespan);
     }
 
     async run()
@@ -32,7 +40,7 @@ export class Main
             throw new Error("The KEY_ROTATION_INTERVAL environment variable is not set.");
         }
 
-        // TODO: Determine the CORS origins in a per-request fashion instead of loading them all at startup. This also
+        // TODO: Determine the CORS origins in a per-request fashion instead of loading them all at startup.
         const corsOrigins = await App.getAllCorsOrigins();
         console.log("cors origins: ", corsOrigins);
 
@@ -70,8 +78,6 @@ export class Main
         });
 
         console.log(`Listening on http://0.0.0.0:${process.env.SVC_PORT}`);
-
-        await this._keyRotator.start(parseInt(process.env.KEY_ROTATION_INTERVAL));
     }
 }
 

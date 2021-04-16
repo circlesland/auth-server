@@ -53,3 +53,16 @@ model SigningKeyPairs {
   privateKeyJwk String
   publicKeyJwk String
 }
+
+enum KeyRotatorState {
+    Requested
+    Active
+}
+
+model KeyRotator {
+  id Int @default(autoincrement()) @id
+  instanceId String
+  state KeyRotatorState
+  validTo DateTime
+  @@unique([instanceId, state, validTo], name: "UX_KeyRotators")
+}

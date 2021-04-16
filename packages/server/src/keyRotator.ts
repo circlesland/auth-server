@@ -1,57 +1,97 @@
 import {SigningKeyPair} from "@circlesland/auth-data/dist/signingKeyPair";
+import {KeyRotatorState} from "@circlesland/auth-data/dist/type";
+import {prisma_rw} from "@circlesland/auth-data/dist/prisma_rw";
 
-export class KeyRotator
-{
-    private _intervalHandle?:number;
-    private _validTo?:Date;
+export class KeyRotator {
+    readonly _instanceId:string;
+    static readonly checkInterval:number;
+    readonly _signingKeyLifespan:number;
 
-    async start(invalidateEveryNSeconds: number)
-    {
-        if (this._intervalHandle)
-        {
-            throw new Error("The KeyRotator was already started.");
-        }
-        if (invalidateEveryNSeconds < 3600)
-        {
-            throw new Error("The minimum lifetime of key pairs must be 3600 seconds.")
-        }
+    /**
+     * If this is currently active keyRotator.
+     */
+    get isActive() {
+        return this._isActive;
+    }
+    private _isActive:boolean = false;
 
-        this._validTo = await KeyRotator._ensureValidKeyPair();
+    constructor(instanceId:string, signingKeyLifespan:number) {
+        this._instanceId = instanceId;
+        this._signingKeyLifespan = signingKeyLifespan;
 
         setInterval(async () =>
         {
-          const now = new Date();
+            // Check if there is already a valid KeyRotator (requested or active) in the system
+            const now = new Date();
+            const keyRotator = await prisma_rw.keyRotator.findFirst({
+                where: {
+                    validTo: {
+                        gt: now
+                    }
+                }
+            });
 
-          // TODO: Add the "valid from" claim to the jwt and create overlapping keys
-          if (!this._validTo || now < this._validTo) {
-            return;
-          }
+            if (keyRotator
+                && keyRotator.instanceId != this._instanceId) {
+                // There is already a keyRotator and its not me :(
+                return;
+            }
 
-          this._validTo = await KeyRotator._ensureValidKeyPair();
-        }, 500);
-    }
+            if (keyRotator
+                && keyRotator.instanceId == this._instanceId
+                && keyRotator.state == KeyRotatorState.Active) {
+                // I'm the key-rotator, keep it this way
+                await prisma_rw.keyRotator.update({
+                    where: {
+                        id: keyRotator.id
+                    },
+                    data: {
+                        validTo: new Date(now.getTime() + KeyRotator.checkInterval * 2)
+                    }
+                });
 
-    stop()
-    {
-        // TODO: Find a way to correctly stop the nodejs timer
-        if (!this._intervalHandle)
-        {
-            throw new Error("The KeyRotator wasn't running.")
-        }
-        clearInterval(this._intervalHandle);
-        this._intervalHandle = undefined;
-        this._validTo = undefined;
+                // Fulfil the keyRotator's duty ..
+                await KeyRotator._ensureValidKeyPair(this._signingKeyLifespan);
+                return;
+            }
+
+            if (keyRotator
+                && keyRotator.instanceId == this._instanceId
+                && keyRotator.state == KeyRotatorState.Requested) {
+                // I'm becoming the key-rotator
+                await prisma_rw.keyRotator.update({
+                    where: {
+                        id: keyRotator.id
+                    },
+                    data: {
+                        state: KeyRotatorState.Active,
+                        validTo: new Date(now.getTime() + KeyRotator.checkInterval * 2)
+                    }
+                });
+                return;
+            }
+
+            // None of the previous conditions matched,
+            // request to become the key-rotator.
+            await prisma_rw.keyRotator.create({
+                data: {
+                    instanceId: this._instanceId,
+                    state: KeyRotatorState.Requested,
+                    validTo: new Date(now.getTime() + KeyRotator.checkInterval * 2)
+                }
+            });
+        }, KeyRotator.checkInterval);
     }
 
     /**
      * Checks if a valid key pair exists. If not, a new one is created.
      * @private
      */
-    private static async _ensureValidKeyPair() : Promise<Date>
+    private static async _ensureValidKeyPair(keyLifespan:number) : Promise<Date>
     {
         let keyPair = await SigningKeyPair.findValidKey();
         if (!keyPair) {
-           keyPair = await SigningKeyPair.createKeyPair();
+            keyPair = await SigningKeyPair.createKeyPair(keyLifespan);
         }
         return keyPair.validTo;
     }
