@@ -4,7 +4,7 @@ import {prisma_rw} from "@circlesland/auth-data/dist/prisma_rw";
 
 export class KeyRotator {
     readonly _instanceId:string;
-    static readonly checkInterval:number;
+    static readonly checkInterval:number = 1000;
     readonly _signingKeyLifespan:number;
 
     /**
