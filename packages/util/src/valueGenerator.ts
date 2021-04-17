@@ -9,8 +9,8 @@ export class ValueGenerator
 
     static generateRandomUrlSafeString(length:number) {
         return ValueGenerator.generateRandomBase64String(length)
-            .replace("+",".")
-            .replace("/","_")
-            .replace("=","-");
+            .split("+").join(".")
+            .split("/").join("_")
+            .split("=").join("-");
     }
 }

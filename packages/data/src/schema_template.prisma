@@ -24,6 +24,7 @@ model Apps {
   loginMailHtmlTemplate String?     // A mustache template for the login email html content
   loginMailTxtTemplate String?      // A mustache template for the login email plaintext content
   loginWindowHtmlTemplate String?   // A mustache template for the login window
+  isInternal Boolean?               // Determines if the
 }
 
 enum ChallengeState {
