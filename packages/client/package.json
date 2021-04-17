@@ -1,7 +1,7 @@
 {
   "name": "@circlesland/auth-client",
   "repository":"https://github.com/circlesland/circles-auth",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "",
   "keywords": [],
   "author": "circles.land",
