@@ -104,6 +104,10 @@ export class Challenge
     {
       // Leave as is
     }
+    else if (type === "delegated")
+    {
+      // Leave as is
+    }
     else
     {
       throw new Error("Unknown challenge type '" + type + "'.");
