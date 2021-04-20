@@ -10,6 +10,13 @@ export class App
 
     static async getAllCorsOrigins() : Promise<string[]> {
         const apps = await prisma_ro.apps.findMany();
-        return apps.map(o => o.corsOrigins.split(";")).reduce((p,c) => p.concat(c), []);
+        const deduped = apps
+            .map(o => o.corsOrigins.split(";"))
+            .reduce((p,c) => p.concat(c), [])
+            .reduce((p,c) => {
+                p[c] = c;
+                return p;
+            }, <{[x:string]:any}>{});
+        return Object.keys(deduped);
     }
 }
