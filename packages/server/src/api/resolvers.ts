@@ -30,6 +30,7 @@ export class Resolvers
     exchangeCodeUrl: string
     exchangeTokenUrl: string
     challengeLifetime: number
+    ssoFor: string | null
     tokenLifetime: number
     loginMailSubjectTemplate: string | null
     loginMailHtmlTemplate: string | null
@@ -59,6 +60,10 @@ export class Resolvers
         const app = await Resolvers.getAppById(forAppId);
         if (!app.depositChallengeUrl) {
           throw new Error(`${app.appId} doesn't support delegated authentication (no 'depositChallengeUrl').`);
+        }
+
+        if (!app.ssoFor || app.ssoFor.trim() == "" || app.ssoFor.split(";").indexOf(byAppId) < 0) {
+          throw new Error(`App '${app.appId}' doesn't allow delegated authentication for app '${byAppId}'.`)
         }
 
         // Create a signed token that contains the "delegate auth code" as subject and
