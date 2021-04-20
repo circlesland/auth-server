@@ -65,10 +65,15 @@ export class Client
   {
     const tokenPayload: any = jsonwebtoken.decode(jwt);
 
-    // Check who issued the token
-    if (typeof tokenPayload !== "object")
+    if (!tokenPayload
+        || !tokenPayload.iss
+        || !tokenPayload.sub
+        || !tokenPayload.aud)
+    {
       throw new Error("Couldn't decode the jwt");
+    }
 
+    // Check who issued the token
     let kid = tokenPayload.kid;
     if (!kid)
       throw new Error("No key id (kid) claim.")

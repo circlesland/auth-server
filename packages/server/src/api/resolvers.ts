@@ -11,6 +11,7 @@ import {SigningKeyPair} from "@circlesland/auth-data/dist/signingKeyPair";
 import {App} from "@circlesland/auth-data/dist/apps";
 import {Template} from "@circlesland/auth-mailer/dist/template";
 const packageJson = require("../../package.json");
+import fetch from "cross-fetch";
 
 export class Resolvers
 {
@@ -34,6 +35,7 @@ export class Resolvers
     loginMailHtmlTemplate: string | null
     loginMailTxtTemplate: string | null
     loginWindowHtmlTemplate: string | null
+    depositChallengeUrl: string | null
   }> {
     const app = await App.findById(appId);
 
@@ -46,6 +48,41 @@ export class Resolvers
   constructor()
   {
     this.mutationResolvers = {
+      challenge: async (parent, {appId, challengeType, code}) => {
+        if (challengeType !== "delegated") {
+          throw new Error(`Unknown challenge type: ${challengeType}.`)
+        }
+
+        const app = await Resolvers.getAppById(appId);
+        if (!app.depositChallengeUrl) {
+          throw new Error(`${app.appId} doesn't support delegated authentication (no 'depositChallengeUrl').`);
+        }
+
+        // Create a signed token that contains the "delegate auth code" as subject and
+        // a newly created challenge in a custom field and send it to the api that issued
+        // the "delegate auth code".
+        const challenge = await Challenge.requestChallenge("delegated", code, appId, 8, app.challengeLifetime);
+        if (!challenge.success) {
+          throw new Error(`Couldn't create a challenge for app '${appId}' and delegate auth code '${code}'.`)
+        }
+        const jwt = await Resolvers._generateJwt("delegated", code, appId, {
+          challenge: challenge.challenge,
+          challengeValidTo: challenge.validTo
+        });
+        /*
+
+        const url = process.env.EXTERNAL_URL + "/graphql?query=query%20%7B%20keys%28kid%3A%22" + keypair.id + "%22%29%20%7Bid%2C%20validTo%2C%20publicKey%20%7D%7D";
+        fetch({
+          url: app.depositChallengeUrl,
+
+        })
+         */
+
+        return {
+          success: false
+        }
+      },
+
       loginWithPublicKey:  async (parent, {appId, publicKey}) => {
         const app = await Resolvers.getAppById(appId);
         const challenge = await Challenge.requestChallenge("publicKey", publicKey, app.appId, 8, app.challengeLifetime);
@@ -150,12 +187,21 @@ export class Resolvers
     }
   }
 
-  private static async _generateJwt(type:string, key: string, forAppId: string)
+  private static async _generateJwt(type:string, sub: string, forAppId: string, additional?:{[key:string]:any})
   {
+    const allowedTypes = ["publicKey", "email", "delegated"];
+    if (allowedTypes.indexOf(type) == -1) {
+      throw new Error(`'${type}' is not a valid type. Valid types are: ${allowedTypes.join(", ")}`)
+    }
+
     if (!process.env.KEY_ROTATION_INTERVAL)
     {
       throw new Error("The KEY_ROTATION_INTERVAL environment variable must contain a numeric " +
         "value that specifies the token expiration duration in minutes.")
+    }
+
+    if (!additional) {
+      additional = {};
     }
 
     const app = await Resolvers.getAppById(forAppId);
@@ -163,8 +209,6 @@ export class Resolvers
     // RFC 7519: 4.1.1.  "iss" (Issuer) Claim
     const iss = process.env.ISSUER;
 
-    // RFC 7519: 4.1.2.  "sub" (Subject) Claim
-    const sub = key;
     const subType = type;
 
     // RFC 7519: 4.1.3.  "aud" (Audience) Claim
@@ -193,7 +237,7 @@ export class Resolvers
     const kid = process.env.EXTERNAL_URL + "/graphql?query=query%20%7B%20keys%28kid%3A%22" + keypair.id + "%22%29%20%7Bid%2C%20validTo%2C%20publicKey%20%7D%7D";
 
     const tokenData = {
-      iss, sub, subType, aud, exp, iat, jti, kid
+      ...additional, iss, sub, subType, aud, exp, iat, jti, kid
     };
 
     return jsonwebtoken.sign(tokenData, keypair.privateKeyPem, {

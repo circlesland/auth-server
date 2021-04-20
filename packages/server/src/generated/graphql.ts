@@ -19,6 +19,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   loginWithEmail: LoginResponse;
   loginWithPublicKey: LoginResponse;
+  challenge: ChallengeResponse;
   verify: VerifyResponse;
 };
 
@@ -32,6 +33,13 @@ export type MutationLoginWithEmailArgs = {
 export type MutationLoginWithPublicKeyArgs = {
   appId: Scalars['String'];
   publicKey: Scalars['String'];
+};
+
+
+export type MutationChallengeArgs = {
+  appId: Scalars['String'];
+  challengeType: Scalars['String'];
+  code: Scalars['String'];
 };
 
 
@@ -67,6 +75,12 @@ export type LoginResponse = ActionResponse & {
   success: Scalars['Boolean'];
   errorMessage?: Maybe<Scalars['String']>;
   challenge?: Maybe<Scalars['String']>;
+};
+
+export type ChallengeResponse = ActionResponse & {
+  __typename?: 'ChallengeResponse';
+  success: Scalars['Boolean'];
+  errorMessage?: Maybe<Scalars['String']>;
 };
 
 export type VerifyResponse = ActionResponse & {
@@ -169,11 +183,12 @@ export type ResolversTypes = ResolversObject<{
   Mutation: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars['String']>;
   Query: ResolverTypeWrapper<{}>;
-  ActionResponse: ResolversTypes['LoginResponse'] | ResolversTypes['VerifyResponse'];
+  ActionResponse: ResolversTypes['LoginResponse'] | ResolversTypes['ChallengeResponse'] | ResolversTypes['VerifyResponse'];
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   PublicKey: ResolverTypeWrapper<PublicKey>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   LoginResponse: ResolverTypeWrapper<LoginResponse>;
+  ChallengeResponse: ResolverTypeWrapper<ChallengeResponse>;
   VerifyResponse: ResolverTypeWrapper<VerifyResponse>;
   Version: ResolverTypeWrapper<Version>;
 }>;
@@ -184,11 +199,12 @@ export type ResolversParentTypes = ResolversObject<{
   Mutation: {};
   String: Scalars['String'];
   Query: {};
-  ActionResponse: ResolversParentTypes['LoginResponse'] | ResolversParentTypes['VerifyResponse'];
+  ActionResponse: ResolversParentTypes['LoginResponse'] | ResolversParentTypes['ChallengeResponse'] | ResolversParentTypes['VerifyResponse'];
   Boolean: Scalars['Boolean'];
   PublicKey: PublicKey;
   Int: Scalars['Int'];
   LoginResponse: LoginResponse;
+  ChallengeResponse: ChallengeResponse;
   VerifyResponse: VerifyResponse;
   Version: Version;
 }>;
@@ -200,6 +216,7 @@ export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   loginWithEmail?: Resolver<ResolversTypes['LoginResponse'], ParentType, ContextType, RequireFields<MutationLoginWithEmailArgs, 'appId' | 'emailAddress'>>;
   loginWithPublicKey?: Resolver<ResolversTypes['LoginResponse'], ParentType, ContextType, RequireFields<MutationLoginWithPublicKeyArgs, 'appId' | 'publicKey'>>;
+  challenge?: Resolver<ResolversTypes['ChallengeResponse'], ParentType, ContextType, RequireFields<MutationChallengeArgs, 'appId' | 'challengeType' | 'code'>>;
   verify?: Resolver<ResolversTypes['VerifyResponse'], ParentType, ContextType, RequireFields<MutationVerifyArgs, 'oneTimeToken'>>;
 }>;
 
@@ -209,7 +226,7 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
 }>;
 
 export type ActionResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActionResponse'] = ResolversParentTypes['ActionResponse']> = ResolversObject<{
-  __resolveType: TypeResolveFn<'LoginResponse' | 'VerifyResponse', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'LoginResponse' | 'ChallengeResponse' | 'VerifyResponse', ParentType, ContextType>;
   success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   errorMessage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 }>;
@@ -225,6 +242,12 @@ export type LoginResponseResolvers<ContextType = any, ParentType extends Resolve
   success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   errorMessage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   challenge?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type ChallengeResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChallengeResponse'] = ResolversParentTypes['ChallengeResponse']> = ResolversObject<{
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  errorMessage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -252,6 +275,7 @@ export type Resolvers<ContextType = any> = ResolversObject<{
   ActionResponse?: ActionResponseResolvers<ContextType>;
   PublicKey?: PublicKeyResolvers<ContextType>;
   LoginResponse?: LoginResponseResolvers<ContextType>;
+  ChallengeResponse?: ChallengeResponseResolvers<ContextType>;
   VerifyResponse?: VerifyResponseResolvers<ContextType>;
   Version?: VersionResolvers<ContextType>;
 }>;
