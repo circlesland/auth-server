@@ -126,7 +126,19 @@
             "description": null,
             "args": [
               {
-                "name": "appId",
+                "name": "byAppId",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "forAppId",
                 "description": null,
                 "type": {
                   "kind": "NON_NULL",
@@ -158,7 +170,7 @@
                 "deprecationReason": null
               },
               {
-                "name": "code",
+                "name": "subject",
                 "description": null,
                 "type": {
                   "kind": "NON_NULL",

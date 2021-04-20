@@ -7,7 +7,7 @@ type Mutation {
     # Sends a one time that is encrypted with the supplied public key and awaits a decrypted response at the verify() method.
     loginWithPublicKey(appId:String! publicKey:String!) : LoginResponse!
 
-    challenge(appId:String! challengeType:String! code:String!) : ChallengeResponse!
+    challenge(byAppId:String forAppId:String! challengeType:String! subject:String!) : ChallengeResponse!
 
     # Verifies the one time code and issues a JWT that proofs that the owner has access to the email address or the private key.
     verify(oneTimeToken:String!) : VerifyResponse!

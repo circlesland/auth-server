@@ -48,12 +48,15 @@ export class Resolvers
   constructor()
   {
     this.mutationResolvers = {
-      challenge: async (parent, {appId, challengeType, code}) => {
+      challenge: async (parent, {byAppId, forAppId, challengeType, subject}) => {
+        if (!byAppId) {
+          throw new Error(`This mutation can only handle delegated challenges at the moment.`);
+        }
         if (challengeType !== "delegated") {
           throw new Error(`Unknown challenge type: ${challengeType}.`)
         }
 
-        const app = await Resolvers.getAppById(appId);
+        const app = await Resolvers.getAppById(forAppId);
         if (!app.depositChallengeUrl) {
           throw new Error(`${app.appId} doesn't support delegated authentication (no 'depositChallengeUrl').`);
         }
@@ -61,28 +64,38 @@ export class Resolvers
         // Create a signed token that contains the "delegate auth code" as subject and
         // a newly created challenge in a custom field and send it to the api that issued
         // the "delegate auth code".
-        const challenge = await Challenge.requestChallenge("delegated", code, appId, 8, app.challengeLifetime);
+        const challenge = await Challenge.requestChallenge("delegated", subject, forAppId, 8, app.challengeLifetime);
         if (!challenge.success) {
-          throw new Error(`Couldn't create a challenge for app '${appId}' and delegate auth code '${code}'.`)
+          throw new Error(`Couldn't create a challenge for app '${forAppId}' and delegate auth code '${subject}'.`)
         }
-        const jwt = await Resolvers._generateJwt("delegated", code, appId, {
+        const jwt = await Resolvers._generateJwt("delegated", subject, byAppId, {
+          challengeForAppId: forAppId,
           challenge: challenge.challenge,
           challengeValidTo: challenge.validTo
         });
-        /*
 
-        const url = process.env.EXTERNAL_URL + "/graphql?query=query%20%7B%20keys%28kid%3A%22" + keypair.id + "%22%29%20%7Bid%2C%20validTo%2C%20publicKey%20%7D%7D";
-        fetch({
-          url: app.depositChallengeUrl,
+        const result = await fetch(app.depositChallengeUrl, {
+          "headers": {
+            "content-type": "application/json"
+          },
+          "body": "{\"operationName\":null,\"variables\":{},\"query\":\"mutation {\\n  depositChallenge(jwt: \\\"" + jwt + "\\\") {\\n    success\\n    errorMessage\\n  }\\n}\\n\"}",
+          "method": "POST"
+        });
 
-        })
-         */
+        const responseObj = await result.json();
+        if (responseObj.errors && responseObj.errors.length > 0) {
+          responseObj.errors.forEach((error:any) => {
+            console.error(`An error occurred while depositing a challenge at '${app.depositChallengeUrl}': ${JSON.stringify(error, null, 2)}`);
+          });
+          return {
+            success: false
+          }
+        }
 
         return {
-          success: false
+          success: true
         }
       },
-
       loginWithPublicKey:  async (parent, {appId, publicKey}) => {
         const app = await Resolvers.getAppById(appId);
         const challenge = await Challenge.requestChallenge("publicKey", publicKey, app.appId, 8, app.challengeLifetime);
