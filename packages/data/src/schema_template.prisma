@@ -18,13 +18,14 @@ model Apps {
   corsOrigins String                // A semicolon separated string of cors domains from which the app operates.
   exchangeCodeUrl String            // This page belongs to the auth-service. It allows the user to exchange the solved challenge agains a jwt.
   exchangeTokenUrl String           // This is an application specific URL where the user can exchange the jwt against a session at the token's 'audience'.
+  depositChallengeUrl String        // If the app supports delegated authentication, this url points to the endpoint on which the app expects challenges.
   challengeLifetime Int             // Specifies how long a challenge should be valid (in seconds).
+  challengeTypes String             // The different challenge types that should be available for the app
   tokenLifetime Int                 // Specifies how long tokens for this app should be valid (in seconds).
   loginMailSubjectTemplate String?  // A mustache template for the login email subject line
   loginMailHtmlTemplate String?     // A mustache template for the login email html content
   loginMailTxtTemplate String?      // A mustache template for the login email plaintext content
   loginWindowHtmlTemplate String?   // A mustache template for the login window
-  isInternal Boolean?               // Determines if the
 }
 
 enum ChallengeState {
