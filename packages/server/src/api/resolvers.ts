@@ -57,19 +57,20 @@ export class Resolvers
           throw new Error(`Unknown challenge type: ${challengeType}.`)
         }
 
-        const app = await Resolvers.getAppById(forAppId);
-        if (!app.depositChallengeUrl) {
-          throw new Error(`${app.appId} doesn't support delegated authentication (no 'depositChallengeUrl').`);
+        const forApp = await Resolvers.getAppById(forAppId);
+        const byApp = await Resolvers.getAppById(byAppId);
+        if (!byApp.depositChallengeUrl) {
+          throw new Error(`${byApp.appId} doesn't support delegated authentication (no 'depositChallengeUrl').`);
         }
 
-        if (!app.ssoFor || app.ssoFor.trim() == "" || app.ssoFor.split(";").indexOf(byAppId) < 0) {
-          throw new Error(`App '${app.appId}' doesn't allow delegated authentication for app '${byAppId}'.`)
+        if (!forApp.ssoFor || forApp.ssoFor.trim() == "" || forApp.ssoFor.split(";").indexOf(byApp.appId) < 0) {
+          throw new Error(`App '${forApp.appId}' doesn't allow delegated authentication for app '${byApp.appId}'.`)
         }
 
         // Create a signed token that contains the "delegate auth code" as subject and
         // a newly created challenge in a custom field and send it to the api that issued
         // the "delegate auth code".
-        const challenge = await Challenge.requestChallenge("delegated", subject, forAppId, 8, app.challengeLifetime);
+        const challenge = await Challenge.requestChallenge("delegated", subject, forAppId, 8, forApp.challengeLifetime);
         if (!challenge.success) {
           throw new Error(`Couldn't create a challenge for app '${forAppId}' and delegate auth code '${subject}'.`)
         }
@@ -79,7 +80,7 @@ export class Resolvers
           challengeValidTo: challenge.validTo
         });
 
-        const result = await fetch(app.depositChallengeUrl, {
+        const result = await fetch(byApp.depositChallengeUrl, {
           "headers": {
             "content-type": "application/json"
           },
@@ -90,7 +91,7 @@ export class Resolvers
         const responseObj = await result.json();
         if (responseObj.errors && responseObj.errors.length > 0) {
           responseObj.errors.forEach((error:any) => {
-            console.error(`An error occurred while depositing a challenge at '${app.depositChallengeUrl}': ${JSON.stringify(error, null, 2)}`);
+            console.error(`An error occurred while depositing a challenge at '${forApp.depositChallengeUrl}': ${JSON.stringify(error, null, 2)}`);
           });
           return {
             success: false
