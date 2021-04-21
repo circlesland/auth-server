@@ -26,6 +26,7 @@ interface ActionResponse {
 type PublicKey {
     id: Int!
     publicKey: String!
+    validFrom: String!
     validTo: String!
 }
 

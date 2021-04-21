@@ -191,6 +191,7 @@ export class Resolvers
         return {
           id: pk.id,
           publicKey: pk.publicKeyPem,
+          validFrom: pk.validFrom.toJSON(),
           validTo: pk.validTo.toJSON()
         };
       },

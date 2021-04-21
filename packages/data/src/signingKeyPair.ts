@@ -17,7 +17,8 @@ export class SigningKeyPair
             select: {
                 id: true,
                 publicKeyPem: true,
-                validTo: true
+                validTo: true,
+                validFrom: true
             }
         });
     }
