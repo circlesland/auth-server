@@ -253,7 +253,7 @@ export class Resolvers
 
     // Construct a key id from this service's external url and a parameterized call to the 'keys' resolver.
     // When this url is called it must return the public key that was used to sign the jwt.
-    const kid = process.env.EXTERNAL_URL + "/graphql?query=query%20%7B%20keys%28kid%3A%22" + keypair.id + "%22%29%20%7Bid%2C%20validTo%2C%20publicKey%20%7D%7D";
+    const kid = process.env.EXTERNAL_URL + "/graphql?query=query%20%7B%20keys%28kid%3A%22" + keypair.id + "%22%29%20%7Bid%2C%20validFrom%2C%20validTo%2C%20publicKey%20%7D%7D";
 
     const tokenData = {
       ...additional, iss, sub, subType, aud, exp, iat, jti, kid

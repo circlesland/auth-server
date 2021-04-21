@@ -63,6 +63,7 @@ export class Client
    */
   public async verify(jwt: string)
   {
+    const now = new Date();
     const tokenPayload: any = jsonwebtoken.decode(jwt);
 
     if (!tokenPayload
@@ -82,6 +83,13 @@ export class Client
     const pubKey = key.data.keys.publicKey;
     if (!pubKey)
       throw new Error("Couldn't fetch the public key to verify the jwt");
+
+    if (new Date(key.data.keys.validTo) < new Date(now.getTime() - 500)) {
+      throw new Error(`The signing key is invalid since more than 500 ms.`);
+    }
+    if (new Date(key.data.keys.validFrom) > now) {
+      throw new Error(`The signing key is no yet valid. ValidFrom: ${new Date(key.data.keys.validFrom).toJSON()}. Now it is: ${now.toJSON()}`);
+    }
 
     const verifiedPayload = jsonwebtoken.verify(jwt, pubKey);
     if (!verifiedPayload)
