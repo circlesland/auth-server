@@ -1,6 +1,9 @@
 import nodemailer from "nodemailer";
 import mustache from "mustache";
 import {Template} from "./template";
+import {newLogger} from "@circlesland/auth-util/dist/logger";
+
+const logger = newLogger("/packages/mailer/src/mailer.ts");
 
 export class Mailer
 {
@@ -35,12 +38,18 @@ export class Mailer
             tls: tls
         });
 
-        await transport.sendMail({
+        const mail = {
             from: process.env.SMTP_SENDER,
             to: to,
             subject: mustache.render(template.subject, data),
             html: mustache.render(template.bodyHtml, data),
             text: mustache.render(template.bodyPlain, data),
-        })
+        };
+
+        logger.log(`Sending mail '${mail.subject}' from '${mail.from}' to '${mail.to}' ..`);
+
+        await transport.sendMail(mail)
+
+        logger.log(`Sending mail '${mail.subject}' from '${mail.from}' to '${mail.to}' .. Mail sent.`);
     }
 }

@@ -2,6 +2,9 @@
 import {KeyGenerator} from "@circlesland/auth-util/dist/keyGenerator";
 import {prisma_ro} from "./prisma_ro";
 import {prisma_rw} from "./prisma_rw";
+import {newLogger} from "@circlesland/auth-util/dist/logger";
+
+const logger = newLogger("/packages/data/src/signingKeyPair.ts");
 
 export class SigningKeyPair
 {
@@ -48,7 +51,7 @@ export class SigningKeyPair
 
     public static async clearPrivateKeys() {
         const now = new Date();
-        await prisma_rw.signingKeyPairs.updateMany({
+        const result = await prisma_rw.signingKeyPairs.updateMany({
             where:{
                 validTo: {
                     lte: now
@@ -61,10 +64,15 @@ export class SigningKeyPair
                 privateKeyPem: ""
             }
         });
+        if (result.count > 0) {
+            logger.log(`Removed ${result.count} private key with expired validTo date.`)
+        }
     }
 
     public static async createKeyPair(lifespanInMilliseconds:number)
     {
+        logger.log(`Creating a new keyPair with lifetime ${lifespanInMilliseconds} ..`)
+
         const newKeyPair = await KeyGenerator.generateRsaKeyPair();
         const now = new Date();
         const newKeyPairEntry = await prisma_rw.signingKeyPairs.create({
@@ -77,6 +85,8 @@ export class SigningKeyPair
                 validTo: new Date(now.getTime() + lifespanInMilliseconds)
             }
         });
+
+        logger.log(`Creating a new keyPair with lifetime ${lifespanInMilliseconds} .. Done.`)
 
         return newKeyPairEntry;
     }

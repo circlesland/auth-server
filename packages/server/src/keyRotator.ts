@@ -1,6 +1,9 @@
 import {SigningKeyPair} from "@circlesland/auth-data/dist/signingKeyPair";
 import {KeyRotatorState} from "@circlesland/auth-data/dist/type";
 import {prisma_rw} from "@circlesland/auth-data/dist/prisma_rw";
+import {newLogger} from "@circlesland/auth-util/dist/logger";
+
+const logger = newLogger("/keyRotator.ts");
 
 export class KeyRotator {
     readonly _instanceId:string;
@@ -59,6 +62,7 @@ export class KeyRotator {
                 && keyRotator.instanceId == this._instanceId
                 && keyRotator.state == KeyRotatorState.Requested) {
                 // I'm becoming the key-rotator
+                logger.log("This instance was elected as keyRotator")
                 await prisma_rw.keyRotator.update({
                     where: {
                         id: keyRotator.id
@@ -73,6 +77,7 @@ export class KeyRotator {
 
             // None of the previous conditions matched,
             // request to become the key-rotator.
+            logger.log("Applying as keyRotator")
             await prisma_rw.keyRotator.create({
                 data: {
                     instanceId: this._instanceId,
