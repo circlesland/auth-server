@@ -46,6 +46,23 @@ export class SigningKeyPair
         return validKeyPairs[0];
     }
 
+    public static async clearPrivateKeys() {
+        const now = new Date();
+        await prisma_rw.signingKeyPairs.updateMany({
+            where:{
+                validTo: {
+                    lte: now
+                },
+                privateKeyPem: {
+                    not: ""
+                }
+            },
+            data: {
+                privateKeyPem: ""
+            }
+        });
+    }
+
     public static async createKeyPair(lifespanInMilliseconds:number)
     {
         const newKeyPair = await KeyGenerator.generateRsaKeyPair();

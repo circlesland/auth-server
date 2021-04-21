@@ -93,6 +93,7 @@ export class KeyRotator {
         if (!keyPair) {
             keyPair = await SigningKeyPair.createKeyPair(keyLifespan);
         }
+        await SigningKeyPair.clearPrivateKeys();
         return keyPair.validTo;
     }
 }
