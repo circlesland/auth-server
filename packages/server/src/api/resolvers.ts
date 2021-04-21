@@ -72,7 +72,7 @@ export class Resolvers
         // the "delegate auth code".
         const challenge = await Challenge.requestChallenge("delegated", subject, forAppId, 8, forApp.challengeLifetime);
         if (!challenge.success) {
-          throw new Error(`Couldn't create a challenge for app '${forAppId}' and delegate auth code '${subject}'.`)
+          throw new Error(`Couldn't create a challenge for app '${forAppId}' and delegate auth code '${subject}': ${challenge.errorMessage}`)
         }
         const jwt = await Resolvers._generateJwt("delegated", subject, byAppId, {
           challengeForAppId: forAppId,

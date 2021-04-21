@@ -91,6 +91,8 @@ export class Challenge
 
     // encrypt the challenge with the supplied public key
     let challenge = ValueGenerator.generateRandomUrlSafeString(length);
+    let validUntil = new Date(new Date().getTime() + (validForNSeconds * 1000));
+
     if (type === "publicKey")
     {
       const challengeBuffer = Buffer.from(challenge, "utf8");
@@ -106,14 +108,14 @@ export class Challenge
     }
     else if (type === "delegated")
     {
-      // Leave as is
+      // Shorter validity (10 sec) because no manual interaction is involved
+      validUntil = new Date(new Date().getTime() + 10000);
     }
     else
     {
       throw new Error("Unknown challenge type '" + type + "'.");
     }
 
-    const validUntil = new Date(new Date().getTime() + (validForNSeconds * 1000));
 
     await prisma_rw.challenges.create({
       data: {
