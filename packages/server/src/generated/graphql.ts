@@ -68,6 +68,7 @@ export type PublicKey = {
   __typename?: 'PublicKey';
   id: Scalars['Int'];
   publicKey: Scalars['String'];
+  validFrom: Scalars['String'];
   validTo: Scalars['String'];
 };
 
@@ -235,6 +236,7 @@ export type ActionResponseResolvers<ContextType = any, ParentType extends Resolv
 export type PublicKeyResolvers<ContextType = any, ParentType extends ResolversParentTypes['PublicKey'] = ResolversParentTypes['PublicKey']> = ResolversObject<{
   id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   publicKey?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  validFrom?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   validTo?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
