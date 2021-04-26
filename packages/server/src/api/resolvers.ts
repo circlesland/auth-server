@@ -167,6 +167,10 @@ export class Resolvers
         }
 
         const app = await Resolvers.getAppById(verificationResult.appId);
+        if (!app?.exchangeTokenUrl) {
+          throw new Error(`App '${verificationResult.appId}' has no 'exchangeTokenUrl' or the app could not be found.`);
+        }
+
         const jwt = await Resolvers._generateJwt(verificationResult.type, verificationResult.key, verificationResult.appId);
 
         return <VerifyResponse>{
