@@ -120,6 +120,9 @@ export class Resolvers
       },
       loginWithEmail: async (parent, {appId, emailAddress}) =>
       {
+        emailAddress = emailAddress.toLowerCase();
+        appId = appId.toLowerCase();
+
         const app = await Resolvers.getAppById(appId);
         const challenge = await Challenge.requestChallenge("email", emailAddress, app.appId, 8, app.challengeLifetime);
         if (!challenge.success)
