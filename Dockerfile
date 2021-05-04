@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:15
 LABEL org.opencontainers.image.source=https://github.com/circlesland/auth-server
 
 WORKDIR /usr/o-platform/auth-server
