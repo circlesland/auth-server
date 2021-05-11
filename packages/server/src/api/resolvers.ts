@@ -26,6 +26,8 @@ export class Resolvers
     appDescription: string | null
     appIcon: string | null
     appContact: string | null
+    appTosUrl: string | null
+    appTosVersion: string | null
     corsOrigins: string
     exchangeCodeUrl: string
     exchangeTokenUrl: string
@@ -70,7 +72,7 @@ export class Resolvers
         // Create a signed token that contains the "delegate auth code" as subject and
         // a newly created challenge in a custom field and send it to the api that issued
         // the "delegate auth code".
-        const challenge = await Challenge.requestChallenge("delegated", subject, forAppId, 8, forApp.challengeLifetime);
+        const challenge = await Challenge.requestChallenge("delegated", subject, forAppId, 8, forApp.challengeLifetime, null);
         if (!challenge.success) {
           throw new Error(`Couldn't create a challenge for app '${forAppId}' and delegate auth code '${subject}': ${challenge.errorMessage}`)
         }
@@ -104,7 +106,7 @@ export class Resolvers
       },
       loginWithPublicKey:  async (parent, {appId, publicKey}) => {
         const app = await Resolvers.getAppById(appId);
-        const challenge = await Challenge.requestChallenge("publicKey", publicKey, app.appId, 8, app.challengeLifetime);
+        const challenge = await Challenge.requestChallenge("publicKey", publicKey, app.appId, 8, app.challengeLifetime, null);
         if (!challenge.success)
         {
           return <LoginResponse>{
@@ -118,13 +120,38 @@ export class Resolvers
           challenge: challenge.challenge,
         }
       },
-      loginWithEmail: async (parent, {appId, emailAddress}) =>
+      loginWithEmail: async (parent, {appId, emailAddress, acceptTosVersion}) =>
       {
         emailAddress = emailAddress.toLowerCase();
         appId = appId.toLowerCase();
 
         const app = await Resolvers.getAppById(appId);
-        const challenge = await Challenge.requestChallenge("email", emailAddress, app.appId, 8, app.challengeLifetime);
+
+        //
+        // Check app configuration and ToS if applicable
+        //
+        if (!app.loginMailSubjectTemplate || !app.loginMailTxtTemplate || !app.loginMailHtmlTemplate) {
+          throw new Error(`Application ${app.appId} has no or missing e-mail templates!`);
+        }
+
+        let checkTos = true;
+        if ((app.appTosUrl && !app.appTosVersion) || (!app.appTosUrl && app.appTosVersion)) {
+          throw new Error(`App ${app.id} is not configured properly. It 'appTosUrl' is set but 'appTosVersion' is not or vice versa.`);
+        } else if (!app.appTosUrl && !app.appTosVersion) {
+          checkTos = false;
+        }
+
+        if (checkTos && acceptTosVersion !== app.appTosVersion) {
+          return <LoginResponse>{
+            success: false,
+            errorMessage: `Please accept the terms of service.`
+          };
+        }
+
+        //
+        // Create challenge
+        //
+        const challenge = await Challenge.requestChallenge("email", emailAddress, app.appId, 8, app.challengeLifetime, app.appTosVersion);
         if (!challenge.success)
         {
           return <LoginResponse>{
@@ -133,10 +160,9 @@ export class Resolvers
           }
         }
 
-        if (!app.loginMailSubjectTemplate || !app.loginMailTxtTemplate || !app.loginMailHtmlTemplate) {
-          throw new Error(`Application ${app.appId} has no or missing e-mail templates!`);
-        }
-
+        //
+        // Send challenge
+        //
         const mailTemplate:Template = {
           subject: app.loginMailSubjectTemplate,
           bodyPlain: app.loginMailTxtTemplate,
@@ -185,6 +211,21 @@ export class Resolvers
     };
 
     this.queryResolvers = {
+      tos: async (parent, {appId}) => {
+        const app = await Resolvers.getAppById(appId);
+        if (!app || !app.appTosUrl) {
+          return {
+            found: false,
+            version: undefined,
+            url: undefined
+          };
+        }
+        return {
+          found: true,
+          version: app.appTosVersion ?? undefined,
+          url: app.appTosUrl ?? undefined
+        };
+      },
       keys: async (parent, {kid}) =>
       {
         if (!kid)

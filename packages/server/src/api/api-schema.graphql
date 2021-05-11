@@ -2,7 +2,7 @@ scalar Json
 
 type Mutation {
     # Sends a one time code to the e-mail recipient.
-    loginWithEmail(appId:String! emailAddress:String!) : LoginResponse!
+    loginWithEmail(appId:String! emailAddress:String! acceptTosVersion:String) : LoginResponse!
 
     # Sends a one time that is encrypted with the supplied public key and awaits a decrypted response at the verify() method.
     loginWithPublicKey(appId:String! publicKey:String!) : LoginResponse!
@@ -14,6 +14,7 @@ type Mutation {
 }
 
 type Query {
+    tos(appId:String!) : ToS!
     keys(kid:String!) : PublicKey
     version : Version
 }
@@ -21,6 +22,12 @@ type Query {
 interface ActionResponse {
     success: Boolean!
     errorMessage: String
+}
+
+type ToS {
+    found: Boolean!
+    url: String
+    version: String
 }
 
 type PublicKey {

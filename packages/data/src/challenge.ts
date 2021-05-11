@@ -75,7 +75,7 @@ export class Challenge
     return result[0];
   }
 
-  public static async requestChallenge(type: string, key: string, forAppId: string, length: number, validForNSeconds: number): Promise<RequestChallengeResponse>
+  public static async requestChallenge(type: string, key: string, forAppId: string, length: number, validForNSeconds: number, acceptedToS: string|null): Promise<RequestChallengeResponse>
   {
     const now = new Date();
 
@@ -116,7 +116,6 @@ export class Challenge
       throw new Error("Unknown challenge type '" + type + "'.");
     }
 
-
     await prisma_rw.challenges.create({
       data: {
         appId: forAppId,
@@ -125,7 +124,8 @@ export class Challenge
         timestamp: now,
         status: ChallengeState.Unsolved,
         validUntil: validUntil,
-        challenge: challenge
+        challenge: challenge,
+        acceptedTos: acceptedToS
       },
       select: {
         challenge: true,

@@ -14,6 +14,24 @@ export type Scalars = {
   Json: any;
 };
 
+export type ActionResponse = {
+  success: Scalars['Boolean'];
+  errorMessage?: Maybe<Scalars['String']>;
+};
+
+export type ChallengeResponse = ActionResponse & {
+  __typename?: 'ChallengeResponse';
+  success: Scalars['Boolean'];
+  errorMessage?: Maybe<Scalars['String']>;
+};
+
+
+export type LoginResponse = ActionResponse & {
+  __typename?: 'LoginResponse';
+  success: Scalars['Boolean'];
+  errorMessage?: Maybe<Scalars['String']>;
+  challenge?: Maybe<Scalars['String']>;
+};
 
 export type Mutation = {
   __typename?: 'Mutation';
@@ -27,6 +45,7 @@ export type Mutation = {
 export type MutationLoginWithEmailArgs = {
   appId: Scalars['String'];
   emailAddress: Scalars['String'];
+  acceptTosVersion?: Maybe<Scalars['String']>;
 };
 
 
@@ -48,22 +67,6 @@ export type MutationVerifyArgs = {
   oneTimeToken: Scalars['String'];
 };
 
-export type Query = {
-  __typename?: 'Query';
-  keys?: Maybe<PublicKey>;
-  version?: Maybe<Version>;
-};
-
-
-export type QueryKeysArgs = {
-  kid: Scalars['String'];
-};
-
-export type ActionResponse = {
-  success: Scalars['Boolean'];
-  errorMessage?: Maybe<Scalars['String']>;
-};
-
 export type PublicKey = {
   __typename?: 'PublicKey';
   id: Scalars['Int'];
@@ -72,17 +75,28 @@ export type PublicKey = {
   validTo: Scalars['String'];
 };
 
-export type LoginResponse = ActionResponse & {
-  __typename?: 'LoginResponse';
-  success: Scalars['Boolean'];
-  errorMessage?: Maybe<Scalars['String']>;
-  challenge?: Maybe<Scalars['String']>;
+export type Query = {
+  __typename?: 'Query';
+  tos: ToS;
+  keys?: Maybe<PublicKey>;
+  version?: Maybe<Version>;
 };
 
-export type ChallengeResponse = ActionResponse & {
-  __typename?: 'ChallengeResponse';
-  success: Scalars['Boolean'];
-  errorMessage?: Maybe<Scalars['String']>;
+
+export type QueryTosArgs = {
+  appId: Scalars['String'];
+};
+
+
+export type QueryKeysArgs = {
+  kid: Scalars['String'];
+};
+
+export type ToS = {
+  __typename?: 'ToS';
+  found: Scalars['Boolean'];
+  url?: Maybe<Scalars['String']>;
+  version?: Maybe<Scalars['String']>;
 };
 
 export type VerifyResponse = ActionResponse & {
@@ -181,56 +195,66 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
-  Json: ResolverTypeWrapper<Scalars['Json']>;
-  Mutation: ResolverTypeWrapper<{}>;
-  String: ResolverTypeWrapper<Scalars['String']>;
-  Query: ResolverTypeWrapper<{}>;
-  ActionResponse: ResolversTypes['LoginResponse'] | ResolversTypes['ChallengeResponse'] | ResolversTypes['VerifyResponse'];
+  ActionResponse: ResolversTypes['ChallengeResponse'] | ResolversTypes['LoginResponse'] | ResolversTypes['VerifyResponse'];
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  String: ResolverTypeWrapper<Scalars['String']>;
+  ChallengeResponse: ResolverTypeWrapper<ChallengeResponse>;
+  Json: ResolverTypeWrapper<Scalars['Json']>;
+  LoginResponse: ResolverTypeWrapper<LoginResponse>;
+  Mutation: ResolverTypeWrapper<{}>;
   PublicKey: ResolverTypeWrapper<PublicKey>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
-  LoginResponse: ResolverTypeWrapper<LoginResponse>;
-  ChallengeResponse: ResolverTypeWrapper<ChallengeResponse>;
+  Query: ResolverTypeWrapper<{}>;
+  ToS: ResolverTypeWrapper<ToS>;
   VerifyResponse: ResolverTypeWrapper<VerifyResponse>;
   Version: ResolverTypeWrapper<Version>;
 }>;
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = ResolversObject<{
-  Json: Scalars['Json'];
-  Mutation: {};
-  String: Scalars['String'];
-  Query: {};
-  ActionResponse: ResolversParentTypes['LoginResponse'] | ResolversParentTypes['ChallengeResponse'] | ResolversParentTypes['VerifyResponse'];
+  ActionResponse: ResolversParentTypes['ChallengeResponse'] | ResolversParentTypes['LoginResponse'] | ResolversParentTypes['VerifyResponse'];
   Boolean: Scalars['Boolean'];
+  String: Scalars['String'];
+  ChallengeResponse: ChallengeResponse;
+  Json: Scalars['Json'];
+  LoginResponse: LoginResponse;
+  Mutation: {};
   PublicKey: PublicKey;
   Int: Scalars['Int'];
-  LoginResponse: LoginResponse;
-  ChallengeResponse: ChallengeResponse;
+  Query: {};
+  ToS: ToS;
   VerifyResponse: VerifyResponse;
   Version: Version;
+}>;
+
+export type ActionResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActionResponse'] = ResolversParentTypes['ActionResponse']> = ResolversObject<{
+  __resolveType: TypeResolveFn<'ChallengeResponse' | 'LoginResponse' | 'VerifyResponse', ParentType, ContextType>;
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  errorMessage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+}>;
+
+export type ChallengeResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChallengeResponse'] = ResolversParentTypes['ChallengeResponse']> = ResolversObject<{
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  errorMessage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
 export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Json'], any> {
   name: 'Json';
 }
 
+export type LoginResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['LoginResponse'] = ResolversParentTypes['LoginResponse']> = ResolversObject<{
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  errorMessage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  challenge?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
   loginWithEmail?: Resolver<ResolversTypes['LoginResponse'], ParentType, ContextType, RequireFields<MutationLoginWithEmailArgs, 'appId' | 'emailAddress'>>;
   loginWithPublicKey?: Resolver<ResolversTypes['LoginResponse'], ParentType, ContextType, RequireFields<MutationLoginWithPublicKeyArgs, 'appId' | 'publicKey'>>;
   challenge?: Resolver<ResolversTypes['ChallengeResponse'], ParentType, ContextType, RequireFields<MutationChallengeArgs, 'forAppId' | 'challengeType' | 'subject'>>;
   verify?: Resolver<ResolversTypes['VerifyResponse'], ParentType, ContextType, RequireFields<MutationVerifyArgs, 'oneTimeToken'>>;
-}>;
-
-export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
-  keys?: Resolver<Maybe<ResolversTypes['PublicKey']>, ParentType, ContextType, RequireFields<QueryKeysArgs, 'kid'>>;
-  version?: Resolver<Maybe<ResolversTypes['Version']>, ParentType, ContextType>;
-}>;
-
-export type ActionResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['ActionResponse'] = ResolversParentTypes['ActionResponse']> = ResolversObject<{
-  __resolveType: TypeResolveFn<'LoginResponse' | 'ChallengeResponse' | 'VerifyResponse', ParentType, ContextType>;
-  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  errorMessage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 }>;
 
 export type PublicKeyResolvers<ContextType = any, ParentType extends ResolversParentTypes['PublicKey'] = ResolversParentTypes['PublicKey']> = ResolversObject<{
@@ -241,16 +265,16 @@ export type PublicKeyResolvers<ContextType = any, ParentType extends ResolversPa
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
-export type LoginResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['LoginResponse'] = ResolversParentTypes['LoginResponse']> = ResolversObject<{
-  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  errorMessage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  challenge?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
+  tos?: Resolver<ResolversTypes['ToS'], ParentType, ContextType, RequireFields<QueryTosArgs, 'appId'>>;
+  keys?: Resolver<Maybe<ResolversTypes['PublicKey']>, ParentType, ContextType, RequireFields<QueryKeysArgs, 'kid'>>;
+  version?: Resolver<Maybe<ResolversTypes['Version']>, ParentType, ContextType>;
 }>;
 
-export type ChallengeResponseResolvers<ContextType = any, ParentType extends ResolversParentTypes['ChallengeResponse'] = ResolversParentTypes['ChallengeResponse']> = ResolversObject<{
-  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  errorMessage?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+export type ToSResolvers<ContextType = any, ParentType extends ResolversParentTypes['ToS'] = ResolversParentTypes['ToS']> = ResolversObject<{
+  found?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  url?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  version?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 }>;
 
@@ -272,13 +296,14 @@ export type VersionResolvers<ContextType = any, ParentType extends ResolversPare
 }>;
 
 export type Resolvers<ContextType = any> = ResolversObject<{
-  Json?: GraphQLScalarType;
-  Mutation?: MutationResolvers<ContextType>;
-  Query?: QueryResolvers<ContextType>;
   ActionResponse?: ActionResponseResolvers<ContextType>;
-  PublicKey?: PublicKeyResolvers<ContextType>;
-  LoginResponse?: LoginResponseResolvers<ContextType>;
   ChallengeResponse?: ChallengeResponseResolvers<ContextType>;
+  Json?: GraphQLScalarType;
+  LoginResponse?: LoginResponseResolvers<ContextType>;
+  Mutation?: MutationResolvers<ContextType>;
+  PublicKey?: PublicKeyResolvers<ContextType>;
+  Query?: QueryResolvers<ContextType>;
+  ToS?: ToSResolvers<ContextType>;
   VerifyResponse?: VerifyResponseResolvers<ContextType>;
   Version?: VersionResolvers<ContextType>;
 }>;

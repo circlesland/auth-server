@@ -15,7 +15,9 @@ model Apps {
   appDescription String?            // A brief description of the app
   appIcon String?                   // An e-mail address or a link to an imprint etc.
   appContact String?                // An e-mail address or a link to an imprint etc.
-  corsOrigins String                // A semicolon separated string of cors domains from which the app operates.
+  appTosUrl String?                 // A link to the app's terms of service
+  appTosVersion String?             // The current version of the terms of service
+  corsOrigins String                // A semicolon separated string of cors ulrs from which the app operates.
   exchangeCodeUrl String            // This page belongs to the auth-service. It allows the user to exchange the solved challenge agains a jwt.
   exchangeTokenUrl String           // This is an application specific URL where the user can exchange the jwt against a session at the token's 'audience'.
   depositChallengeUrl String?       // If the app supports delegated authentication, this url points to the endpoint on which the app expects challenges.
@@ -45,6 +47,7 @@ model Challenges {
   @@unique([challenge, status], name: "UX_Challenges_challenge_status")
 
   appId String // The id of the 'App' to which the user wants to log-on.
+  acceptedTos String?
 }
 
 model SigningKeyPairs {
