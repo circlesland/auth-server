@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 import mustache from "mustache";
 import {Template} from "./template";
 import {newLogger} from "@circlesland/auth-util/dist/logger";
+import {TLSSocketOptions} from "tls";
 
 const logger = newLogger("/packages/mailer/src/mailer.ts");
 
@@ -16,11 +17,11 @@ export class Mailer
          || !process.env.SMTP_SENDER)
             throw new Error("One of the SMTP settings is missing in the environment variables");
 
-        const tls: {
-            ciphers?: string;
-        } = {};
+        const tls:TLSSocketOptions  = {
+            ciphers: undefined
+        };
 
-        if (process.env.SMTP_SECURE&& process.env.SMTP_SECURE_CIPHERS) {
+        if (process.env.SMTP_SECURE && process.env.SMTP_SECURE_CIPHERS) {
             tls.ciphers = process.env.SMTP_SECURE_CIPHERS;
         }
 
@@ -32,7 +33,7 @@ export class Mailer
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS
             },
-            tls: tls
+            tls: tls.ciphers ? tls : undefined
         });
 
         const mail = {
