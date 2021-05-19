@@ -20,7 +20,7 @@ export class Mailer
             ciphers?: string;
         } = {};
 
-        if (process.env.SMTP_SECURE && process.env.SMTP_SECURE_CIPHERS) {
+        if (process.env.SMTP_SECURE&& process.env.SMTP_SECURE_CIPHERS) {
             tls.ciphers = process.env.SMTP_SECURE_CIPHERS;
         }
 
@@ -32,7 +32,7 @@ export class Mailer
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS
             },
-            tls: tls.ciphers ? tls : undefined
+            tls: tls
         });
 
         const mail = {
