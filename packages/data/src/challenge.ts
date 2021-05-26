@@ -4,6 +4,7 @@ import * as constants from "constants";
 import {prisma_ro} from "./prisma_ro";
 import {prisma_rw} from "./prisma_rw";
 import {Challenges, ChallengeState} from "@prisma/client";
+import {ChallengeGenerator} from "@circlesland/auth-util/dist/challengeGenerator";
 
 export interface RequestChallengeResponse
 {
@@ -20,6 +21,8 @@ export interface VerifyChallengeResponse
   key?: string,
   appId?: string
 }
+
+export const URL_SAFE_BASE64_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
 export class Challenge
 {
@@ -75,7 +78,17 @@ export class Challenge
     return result[0];
   }
 
-  public static async requestChallenge(type: string, key: string, forAppId: string, length: number, validForNSeconds: number, acceptedToS: string|null): Promise<RequestChallengeResponse>
+  public static async requestChallenge(
+      type: string,
+      key: string,
+      forApp: {
+        appId:string,
+        challengeLifetime:number,
+        challengeLength:number|null,
+        challengeAlphabet:string|null
+      },
+      acceptedToS: string|null
+  ): Promise<RequestChallengeResponse>
   {
     const now = new Date();
 
@@ -90,8 +103,10 @@ export class Challenge
     }
 
     // encrypt the challenge with the supplied public key
-    let challenge = ValueGenerator.generateRandomUrlSafeString(length);
-    let validUntil = new Date(new Date().getTime() + (validForNSeconds * 1000));
+    const challengeLength = forApp.challengeLength ? forApp.challengeLength : 8;
+    const challengeAlphabet = forApp.challengeAlphabet ? forApp.challengeAlphabet : URL_SAFE_BASE64_ALPHABET;
+    let challenge = ChallengeGenerator.generate(challengeLength, challengeAlphabet);
+    let validUntil = new Date(new Date().getTime() + (forApp.challengeLifetime * 1000));
 
     if (type === "publicKey")
     {
@@ -118,7 +133,7 @@ export class Challenge
 
     await prisma_rw.challenges.create({
       data: {
-        appId: forAppId,
+        appId: forApp.appId,
         type: type,
         key: key,
         timestamp: now,

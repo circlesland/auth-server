@@ -13,33 +13,39 @@ import {Template} from "@circlesland/auth-mailer/dist/template";
 const packageJson = require("../../package.json");
 import fetch from "cross-fetch";
 
+export type PrismaApp =
+{
+  id: number
+  appId: string
+  appName: string | null
+  appUrl: string | null
+  appDescription: string | null
+  appIcon: string | null
+  appContact: string | null
+  appTosUrl: string | null
+  appTosVersion: string | null
+  corsOrigins: string
+  exchangeCodeUrl: string
+  exchangeTokenUrl: string
+  challengeLifetime: number
+  challengeTypes: string
+  challengeAlphabet: string | null
+  challengeLength: number | null
+  ssoFor: string | null
+  tokenLifetime: number
+  loginMailSubjectTemplate: string | null
+  loginMailHtmlTemplate: string | null
+  loginMailTxtTemplate: string | null
+  loginWindowHtmlTemplate: string | null
+  depositChallengeUrl: string | null
+};
+
 export class Resolvers
 {
   readonly queryResolvers: QueryResolvers;
   readonly mutationResolvers: MutationResolvers;
 
-  static async getAppById(appId:string) :  Promise<{
-    id: number
-    appId: string
-    appName: string | null
-    appUrl: string | null
-    appDescription: string | null
-    appIcon: string | null
-    appContact: string | null
-    appTosUrl: string | null
-    appTosVersion: string | null
-    corsOrigins: string
-    exchangeCodeUrl: string
-    exchangeTokenUrl: string
-    challengeLifetime: number
-    ssoFor: string | null
-    tokenLifetime: number
-    loginMailSubjectTemplate: string | null
-    loginMailHtmlTemplate: string | null
-    loginMailTxtTemplate: string | null
-    loginWindowHtmlTemplate: string | null
-    depositChallengeUrl: string | null
-  }> {
+  static async getAppById(appId:string) :  Promise<PrismaApp> {
     const app = await App.findById(appId);
 
     if (!app)
@@ -72,7 +78,7 @@ export class Resolvers
         // Create a signed token that contains the "delegate auth code" as subject and
         // a newly created challenge in a custom field and send it to the api that issued
         // the "delegate auth code".
-        const challenge = await Challenge.requestChallenge("delegated", subject, forAppId, 8, forApp.challengeLifetime, null);
+        const challenge = await Challenge.requestChallenge("delegated", subject, forApp, null);
         if (!challenge.success) {
           throw new Error(`Couldn't create a challenge for app '${forAppId}' and delegate auth code '${subject}': ${challenge.errorMessage}`)
         }
@@ -106,7 +112,7 @@ export class Resolvers
       },
       loginWithPublicKey:  async (parent, {appId, publicKey}) => {
         const app = await Resolvers.getAppById(appId);
-        const challenge = await Challenge.requestChallenge("publicKey", publicKey, app.appId, 8, app.challengeLifetime, null);
+        const challenge = await Challenge.requestChallenge("publicKey", publicKey, app, null);
         if (!challenge.success)
         {
           return <LoginResponse>{
@@ -136,7 +142,7 @@ export class Resolvers
 
         let checkTos = true;
         if ((app.appTosUrl && !app.appTosVersion) || (!app.appTosUrl && app.appTosVersion)) {
-          throw new Error(`App ${app.id} is not configured properly. It 'appTosUrl' is set but 'appTosVersion' is not or vice versa.`);
+          throw new Error(`App ${app.id} is not configured properly. Its 'appTosUrl' is set but 'appTosVersion' is not or vice versa.`);
         } else if (!app.appTosUrl && !app.appTosVersion) {
           checkTos = false;
         }
@@ -151,7 +157,7 @@ export class Resolvers
         //
         // Create challenge
         //
-        const challenge = await Challenge.requestChallenge("email", emailAddress, app.appId, 8, app.challengeLifetime, app.appTosVersion);
+        const challenge = await Challenge.requestChallenge("email", emailAddress, app, app.appTosVersion);
         if (!challenge.success)
         {
           return <LoginResponse>{
